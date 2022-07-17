@@ -13,29 +13,30 @@ async function createDirNode(
   handle: FileSystemDirectoryHandle
 ): Promise<ElementDefinition[]> {
   const dir = await convertToDirModel(handle);
-
   return [...createNodes(dir)];
-  // return [
-  //   {
-  //     group: "nodes",
-  //     data: { id: handle.name },
-  //   },
-  // ];
 }
 
 function createNodes(dirModel: DirModel): NodeDefinition[] {
   return [
-    ...(dirModel.tsFiles ?? []).map((tsfile) =>
-      createNode(tsfile, tsfile.parent)
-    ),
+    ...createDirectoryNode(dirModel),
+    ...(dirModel.tsFiles ?? []).map(createTsFileNode),
     ...(dirModel.directories ?? []).map(createNodes).flat(),
   ];
 }
-function createNode(tsfile: TsFileModel, parent: DirModel): NodeDefinition {
-  console.log(parent);
+function createDirectoryNode(dirModel: DirModel): NodeDefinition[] {
+  if (!dirModel.parent) return [];
+  return [
+    {
+      group: "nodes",
+      data: { id: dirModel.path, parent: dirModel.parent?.path },
+    },
+  ];
+}
+function createTsFileNode(tsfile: TsFileModel): NodeDefinition {
+  console.log(tsfile.parent.path);
   return {
     group: "nodes",
-    data: { id: tsfile.name, parent: parent.path },
+    data: { id: tsfile.name, parent: tsfile.parent.path },
   };
 }
 
