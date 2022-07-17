@@ -6,7 +6,7 @@ import {
 } from "browser-typescript-parser";
 
 export type Dir = {
-  name: string;
+  path: string;
   parent?: Dir;
   tsFiles?: TsFile[];
   directories?: Dir[];
@@ -32,15 +32,25 @@ type Export = {
 
 export async function convertToDir(
   dirHandle: FileSystemDirectoryHandle,
-  parent?: Dir
+  parent?: Dir,
+  _parser?: TypescriptParser
 ): Promise<Dir> {
   const dir: Dir = {
-    name: dirHandle.name,
+    path: parent ? `${parent.path}/${dirHandle.name}` : dirHandle.name,
     parent,
   };
+  const parser = _parser ?? new TypescriptParser();
+  const tsFiles = await analyzeTsFiles(dirHandle, dir, parser);
+  dir.tsFiles = tsFiles;
+  return dir;
+}
 
-  const parser = new TypescriptParser();
-
+/** dirHandle のディレクトリが保有するTypeScriptのファイルを TsFile に変換する */
+async function analyzeTsFiles(
+  dirHandle: FileSystemDirectoryHandle,
+  parent: Dir,
+  parser: TypescriptParser
+) {
   const promises = [];
   for await (const entry of dirHandle.values()) {
     if (entry.kind !== "file") continue;
@@ -73,7 +83,8 @@ export async function convertToDir(
                   (dec as any).isDefault = true;
                   return dec;
                 })
-                .filter((dec) => (console.log(dec), (dec as any).isExported))
+                .filter((dec) => (dec as any).isExported)
+                // .filter((dec) => (console.log(dec), (dec as any).isExported))
                 .filter((dec) => !(dec instanceof DefaultDeclaration))
                 .map((dec) => ({
                   name: dec.name,
@@ -88,10 +99,11 @@ export async function convertToDir(
                   src: text.substring(dec.start ?? 0, dec.end),
                   isDefault: !!(dec as any).isDefault,
                 })),
+              parent,
             } as TsFile)
         )
     );
   }
-  await Promise.all(promises).then();
-  return { name: dirHandle.name, parent, tsFiles: [], directories: [] };
+  const tsFiles = await Promise.all(promises);
+  return tsFiles;
 }

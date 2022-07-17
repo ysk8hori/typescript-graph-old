@@ -89,7 +89,7 @@ function App() {
   const [elements, setElements] = useState<ElementDefinition[]>([]);
   useEffect(() => {
     if (!dirHandle) return;
-    setElements(createGraph(dirHandle));
+    createGraph(dirHandle).then(setElements);
   }, [dirHandle]);
   console.log(elements);
 
