@@ -15,15 +15,15 @@ export type DirModel = {
 export type TsFileModel = {
   name: string;
   parent: DirModel;
-  imports: Import[];
-  exports: Export[];
+  imports: ImportModel[];
+  exports: ExportModel[];
 };
 
-type Import = {
+export type ImportModel = {
   src: string;
 };
 
-type Export = {
+export type ExportModel = {
   name: string;
   type: "type" | "function" | "const" | "let";
   src: string;
@@ -99,7 +99,6 @@ async function analyzeTsFiles(
                   return dec;
                 })
                 .filter((dec) => (dec as any).isExported)
-                // .filter((dec) => (console.log(dec), (dec as any).isExported))
                 .filter((dec) => !(dec instanceof DefaultDeclaration))
                 .map((dec) => ({
                   name: dec.name,

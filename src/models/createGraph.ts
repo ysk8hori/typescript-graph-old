@@ -1,5 +1,10 @@
 import { NodeDefinition, EdgeDefinition, ElementDefinition } from "cytoscape";
-import { convertToDirModel, DirModel, TsFileModel } from "./DirModel";
+import {
+  convertToDirModel,
+  DirModel,
+  ImportModel,
+  TsFileModel,
+} from "./DirModel";
 
 export async function createGraph(
   handle: FileSystemDirectoryHandle,
@@ -33,7 +38,6 @@ function createDirectoryNode(dirModel: DirModel): NodeDefinition[] {
   ];
 }
 function createTsFileNode(tsfile: TsFileModel): NodeDefinition {
-  console.log(tsfile.parent.path);
   return {
     group: "nodes",
     data: { id: tsfile.name, parent: tsfile.parent.path },
@@ -43,4 +47,9 @@ function createTsFileNode(tsfile: TsFileModel): NodeDefinition {
 // function createEdges(dirModel:DirModel): EdgeDefinition[] {
 
 // }
-// function createEdge()
+// function createEdge(nodes:NodeDefinition[],tsFile:TsFileModel, imp:ImportModel): EdgeDefinition {
+//   return {
+//     data:{source:tsFile.name, target:nodes.find(node=> node.data.id === imp.)}
+//   }
+
+// }

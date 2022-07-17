@@ -57,7 +57,7 @@ function App() {
                     (dec as any).isDefault = true;
                     return dec;
                   })
-                  .filter((dec) => (console.log(dec), (dec as any).isExported))
+                  .filter((dec) => (dec as any).isExported)
                   .filter((dec) => !(dec instanceof DefaultDeclaration))
                   .map((dec) => ({
                     name: dec.name,
@@ -91,7 +91,6 @@ function App() {
     if (!dirHandle) return;
     createGraph(dirHandle).then(setElements);
   }, [dirHandle]);
-  console.log(elements);
 
   return (
     <Container>

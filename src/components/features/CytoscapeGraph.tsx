@@ -8,7 +8,6 @@ export default function CytoscapeGraph({
 }: {
   elements: ElementDefinition[];
 }) {
-  console.log(elements);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!ref) return;
