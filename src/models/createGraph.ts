@@ -1,5 +1,5 @@
 import { NodeDefinition, EdgeDefinition, ElementDefinition } from "cytoscape";
-import { convertToDir } from "./TsFile";
+import { convertToDirModel, DirModel, TsFileModel } from "./DirModel";
 
 export async function createGraph(
   handle: FileSystemDirectoryHandle,
@@ -12,33 +12,9 @@ export async function createGraph(
 async function createDirNode(
   handle: FileSystemDirectoryHandle
 ): Promise<ElementDefinition[]> {
-  const dir = await convertToDir(handle);
-  console.log(dir);
-  const asdf: { nodes: NodeDefinition; edges: EdgeDefinition[] }[] =
-    dir.tsFiles!.map((tsfile) => {
-      return {
-        nodes: {
-          group: "nodes",
-          data: { id: tsfile.name, parent: dir.path },
-        },
-        // edges: tsfile.imports.map((imp) => {
-        //   return {
-        //     group: "edges",
-        //     data: { source: tsfile.name, target: imp.src },
-        //   } as EdgeDefinition;
-        // }),
-        edges: [],
-      };
-    });
-  console.log(asdf);
-  return [
-    ...asdf
-      .map((qwer) => {
-        return [qwer.nodes, ...qwer.edges];
-      })
-      .flat(),
-    { group: "nodes", data: { id: dir.path } },
-  ];
+  const dir = await convertToDirModel(handle);
+
+  return [...createNodes(dir)];
   // return [
   //   {
   //     group: "nodes",
@@ -46,3 +22,24 @@ async function createDirNode(
   //   },
   // ];
 }
+
+function createNodes(dirModel: DirModel): NodeDefinition[] {
+  return [
+    ...(dirModel.tsFiles ?? []).map((tsfile) =>
+      createNode(tsfile, tsfile.parent)
+    ),
+    ...(dirModel.directories ?? []).map(createNodes).flat(),
+  ];
+}
+function createNode(tsfile: TsFileModel, parent: DirModel): NodeDefinition {
+  console.log(parent);
+  return {
+    group: "nodes",
+    data: { id: tsfile.name, parent: parent.path },
+  };
+}
+
+// function createEdges(dirModel:DirModel): EdgeDefinition[] {
+
+// }
+// function createEdge()

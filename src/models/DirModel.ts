@@ -5,16 +5,16 @@ import {
   VariableDeclaration,
 } from "browser-typescript-parser";
 
-export type Dir = {
+export type DirModel = {
   path: string;
-  parent?: Dir;
-  tsFiles?: TsFile[];
-  directories?: Dir[];
+  parent?: DirModel;
+  tsFiles?: TsFileModel[];
+  directories?: DirModel[];
 };
 
-export type TsFile = {
+export type TsFileModel = {
   name: string;
-  parent: Dir;
+  parent: DirModel;
   imports: Import[];
   exports: Export[];
 };
@@ -30,12 +30,12 @@ type Export = {
   isDefault: boolean;
 };
 
-export async function convertToDir(
+export async function convertToDirModel(
   dirHandle: FileSystemDirectoryHandle,
-  parent?: Dir,
+  parent?: DirModel,
   _parser?: TypescriptParser
-): Promise<Dir> {
-  const dir: Dir = {
+): Promise<DirModel> {
+  const dir: DirModel = {
     path: parent ? `${parent.path}/${dirHandle.name}` : dirHandle.name,
     parent,
   };
@@ -44,11 +44,17 @@ export async function convertToDir(
   dir.tsFiles = tsFiles;
   // dir.directories = dirHandle.
 
-  const promises: Promise<Dir>[] = [];
+  const promises: Promise<DirModel>[] = [];
   for await (const entry of dirHandle.values()) {
     if (entry.kind !== "directory") continue;
     if (/^\./.test(entry.name)) continue;
-    promises.push(convertToDir(await dirHandle.getDirectoryHandle(entry.name)));
+    promises.push(
+      convertToDirModel(
+        await dirHandle.getDirectoryHandle(entry.name),
+        dir,
+        parser
+      )
+    );
   }
   dir.directories = await Promise.all(promises);
   return dir;
@@ -57,7 +63,7 @@ export async function convertToDir(
 /** dirHandle のディレクトリが保有するTypeScriptのファイルを TsFile に変換する */
 async function analyzeTsFiles(
   dirHandle: FileSystemDirectoryHandle,
-  parent: Dir,
+  parent: DirModel,
   parser: TypescriptParser
 ) {
   const promises = [];
@@ -109,24 +115,10 @@ async function analyzeTsFiles(
                   isDefault: !!(dec as any).isDefault,
                 })),
               parent,
-            } as TsFile)
+            } as TsFileModel)
         )
     );
   }
   const tsFiles = await Promise.all(promises);
   return tsFiles;
-}
-
-/** dirHandle のディレクトリが保有するTypeScriptのファイルを TsFile に変換する */
-async function analyzeDirs(
-  dirHandle: FileSystemDirectoryHandle,
-  parent: Dir
-): Promise<Dir[]> {
-  const promises: Dir[] = [];
-  for await (const entry of dirHandle.values()) {
-    if (entry.kind !== "directory") continue;
-    if (/^\./.test(entry.name)) continue;
-    promises.push({ path: `${parent.path}.${entry.name}` });
-  }
-  return await Promise.all(promises);
 }

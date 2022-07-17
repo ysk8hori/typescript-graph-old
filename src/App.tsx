@@ -8,7 +8,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { NodeDefinition, EdgeDefinition, ElementDefinition } from "cytoscape";
-import { TsFile } from "./models/TsFile";
+import { TsFileModel } from "./models/DirModel";
 import { createGraph } from "./models/createGraph";
 import CytoscapeGraph from "./components/features/CytoscapeGraph";
 
@@ -72,7 +72,7 @@ function App() {
                     src: text.substring(dec.start ?? 0, dec.end),
                     isDefault: !!(dec as any).isDefault,
                   })),
-              } as TsFile)
+              } as TsFileModel)
           )
       );
     }
