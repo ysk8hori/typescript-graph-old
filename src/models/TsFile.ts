@@ -42,6 +42,15 @@ export async function convertToDir(
   const parser = _parser ?? new TypescriptParser();
   const tsFiles = await analyzeTsFiles(dirHandle, dir, parser);
   dir.tsFiles = tsFiles;
+  // dir.directories = dirHandle.
+
+  const promises: Promise<Dir>[] = [];
+  for await (const entry of dirHandle.values()) {
+    if (entry.kind !== "directory") continue;
+    if (/^\./.test(entry.name)) continue;
+    promises.push(convertToDir(await dirHandle.getDirectoryHandle(entry.name)));
+  }
+  dir.directories = await Promise.all(promises);
   return dir;
 }
 
@@ -106,4 +115,18 @@ async function analyzeTsFiles(
   }
   const tsFiles = await Promise.all(promises);
   return tsFiles;
+}
+
+/** dirHandle のディレクトリが保有するTypeScriptのファイルを TsFile に変換する */
+async function analyzeDirs(
+  dirHandle: FileSystemDirectoryHandle,
+  parent: Dir
+): Promise<Dir[]> {
+  const promises: Dir[] = [];
+  for await (const entry of dirHandle.values()) {
+    if (entry.kind !== "directory") continue;
+    if (/^\./.test(entry.name)) continue;
+    promises.push({ path: `${parent.path}.${entry.name}` });
+  }
+  return await Promise.all(promises);
 }
