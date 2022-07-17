@@ -1,0 +1,97 @@
+import {
+  DefaultDeclaration,
+  FunctionDeclaration,
+  TypescriptParser,
+  VariableDeclaration,
+} from "browser-typescript-parser";
+
+export type Dir = {
+  name: string;
+  parent?: Dir;
+  tsFiles?: TsFile[];
+  directories?: Dir[];
+};
+
+export type TsFile = {
+  name: string;
+  parent: Dir;
+  imports: Import[];
+  exports: Export[];
+};
+
+type Import = {
+  src: string;
+};
+
+type Export = {
+  name: string;
+  type: "type" | "function" | "const" | "let";
+  src: string;
+  isDefault: boolean;
+};
+
+export async function convertToDir(
+  dirHandle: FileSystemDirectoryHandle,
+  parent?: Dir
+): Promise<Dir> {
+  const dir: Dir = {
+    name: dirHandle.name,
+    parent,
+  };
+
+  const parser = new TypescriptParser();
+
+  const promises = [];
+  for await (const entry of dirHandle.values()) {
+    if (entry.kind !== "file") continue;
+    if (/test|spec|stories/.test(entry.name)) continue;
+    if (!/.*.ts$|.*.tsx$|.*.js$|.*.jsx$/.test(entry.name)) continue;
+    promises.push(
+      entry
+        .getFile()
+        .then(async (file) => ({ name: file.name, text: await file.text() }))
+        .then(async ({ name, text }) => ({
+          name,
+          file: await parser.parseSource(text),
+          text,
+        }))
+        .then(
+          ({ name, file, text }) =>
+            ({
+              name,
+              imports: file.imports.map((imp) => ({
+                src: text.substring(imp.start ?? 0, imp.end),
+              })),
+              exports: file.declarations
+                .map((dec, _, declarations) => {
+                  if ((dec as any).isExported) return dec;
+                  const def = declarations.find(
+                    (dec) => dec instanceof DefaultDeclaration
+                  );
+                  if (def?.name !== dec.name) return dec;
+                  (dec as any).isExported = true;
+                  (dec as any).isDefault = true;
+                  return dec;
+                })
+                .filter((dec) => (console.log(dec), (dec as any).isExported))
+                .filter((dec) => !(dec instanceof DefaultDeclaration))
+                .map((dec) => ({
+                  name: dec.name,
+                  type:
+                    dec instanceof VariableDeclaration
+                      ? dec.isConst
+                        ? "const"
+                        : "let"
+                      : dec instanceof FunctionDeclaration
+                      ? "function"
+                      : "type",
+                  src: text.substring(dec.start ?? 0, dec.end),
+                  isDefault: !!(dec as any).isDefault,
+                })),
+            } as TsFile)
+        )
+    );
+  }
+  await Promise.all(promises).then();
+  return { name: dirHandle.name, parent, tsFiles: [], directories: [] };
+}
