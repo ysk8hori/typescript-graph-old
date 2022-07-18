@@ -18,7 +18,7 @@ export default function CytoscapeGraph({
           selector: "node",
           style: {
             "background-color": "#2B65EC",
-            label: "data(id)",
+            label: "data(alias)",
           },
         },
 

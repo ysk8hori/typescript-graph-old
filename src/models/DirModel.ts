@@ -21,6 +21,7 @@ export type TsFileModel = {
 
 export type ImportModel = {
   src: string;
+  libraryName: string;
 };
 
 export type ExportModel = {
@@ -84,9 +85,12 @@ async function analyzeTsFiles(
           ({ name, file, text }) =>
             ({
               name,
-              imports: file.imports.map((imp) => ({
-                src: text.substring(imp.start ?? 0, imp.end),
-              })),
+              imports: file.imports
+                // .map((imp) => (console.log(imp), imp))
+                .map((imp) => ({
+                  src: text.substring(imp.start ?? 0, imp.end),
+                  libraryName: imp.libraryName,
+                })),
               exports: file.declarations
                 .map((dec, _, declarations) => {
                   if ((dec as any).isExported) return dec;
