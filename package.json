@@ -1,6 +1,7 @@
 {
   "name": "typescript-graph",
-  "private": true,
+  "private": false,
+  "homepage": "https://ysk8hori.github.io/typescript-graph/",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
