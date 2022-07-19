@@ -48,6 +48,7 @@ export async function convertToDirModel(
   const promises: Promise<DirModel>[] = [];
   for await (const entry of dirHandle.values()) {
     if (entry.kind !== "directory") continue;
+    if (/test|spec|stories/.test(entry.name)) continue;
     if (/^\./.test(entry.name)) continue;
     promises.push(
       convertToDirModel(

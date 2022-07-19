@@ -95,7 +95,8 @@ function createEdge(
 }
 
 function convertToSearchableString(libraryName: string) {
-  return libraryName.replaceAll(/\.\.\/|@\//g, "");
+  // TODO: ここ超適当
+  return libraryName.replaceAll(/\.\.\/|@\/|\.\//g, "");
 }
 
 function exists<T>(t: T | undefined | null): t is T {
