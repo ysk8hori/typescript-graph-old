@@ -1,0 +1,23 @@
+{
+  "extends": ["config:base"],
+  "schedule": ["after 10pm and before 5am every weekend"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "labels": ["UPDATE-MINOR&PATCH"],
+      "excludePackageNames": ["typescript"],
+      "groupName": "minor and patch"
+    },
+    {
+      "matchPackageNames": [
+        "react",
+        "@types/react",
+        "react-dom",
+        "@types/react-dom"
+      ],
+      "matchPackagePatterns": ["@testing-library.*"],
+      "groupName": "react"
+    }
+  ],
+  "automerge": true
+}
