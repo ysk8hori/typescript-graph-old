@@ -35,7 +35,12 @@ export async function convertToDirModel(
   dirHandle: FileSystemDirectoryHandle,
   parent?: DirModel,
   _parser?: TypescriptParser
-): Promise<DirModel> {
+): Promise<DirModel | undefined> {
+  if (
+    /test|spec|stories|node_modules|dist|docs|\_\_|^\..*/.test(dirHandle.name)
+  ) {
+    return undefined;
+  }
   const dir: DirModel = {
     path: parent ? `${parent.path}/${dirHandle.name}` : dirHandle.name,
     parent,
@@ -46,11 +51,12 @@ export async function convertToDirModel(
     (fileModel): fileModel is TsFileModel => !!fileModel
   );
 
-  const promises: Promise<DirModel>[] = [];
+  // TS のファイルが存在しないディレクトリは表示しない
+  if (dir.tsFiles.length === 0) return undefined;
+
+  const promises: Promise<DirModel | undefined>[] = [];
   for await (const entry of dirHandle.values()) {
-    if (entry.kind !== "directory") continue;
-    if (/test|spec|stories|node_modules|dist|docs|^\..*/.test(entry.name))
-      continue;
+    if (entry.kind === "file") continue;
     promises.push(
       convertToDirModel(
         await dirHandle.getDirectoryHandle(entry.name),
@@ -59,7 +65,9 @@ export async function convertToDirModel(
       )
     );
   }
-  dir.directories = await Promise.all(promises);
+  dir.directories = (await Promise.all(promises)).filter(
+    (dir): dir is DirModel => !!dir
+  );
   return dir;
 }
 
@@ -98,12 +106,10 @@ async function analyzeTsFiles(
             ? undefined
             : ({
                 name,
-                imports: file.imports
-                  // .map((imp) => (console.log(imp), imp))
-                  .map((imp) => ({
-                    src: text.substring(imp.start ?? 0, imp.end),
-                    libraryName: imp.libraryName,
-                  })),
+                imports: file.imports.map((imp) => ({
+                  src: text.substring(imp.start ?? 0, imp.end),
+                  libraryName: imp.libraryName,
+                })),
                 exports: file.declarations
                   .map((dec, _, declarations) => {
                     if ((dec as any).isExported) return dec;

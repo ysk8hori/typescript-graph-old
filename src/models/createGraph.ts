@@ -11,7 +11,6 @@ export async function createGraph(
   elements: ElementDefinition[] = []
 ): Promise<ElementDefinition[]> {
   elements.push(...(await createDirNode(handle)));
-  console.log(elements);
   return elements;
 }
 
@@ -19,6 +18,7 @@ async function createDirNode(
   handle: FileSystemDirectoryHandle
 ): Promise<ElementDefinition[]> {
   const dir = await convertToDirModel(handle);
+  if (!dir) return [];
   const nodes = createNodes(dir);
   const edges = createEdges(nodes, dir);
   return [...nodes, ...edges];
@@ -79,12 +79,9 @@ function createEdge(
   tsfile: TsFileModel,
   imp: ImportModel
 ): EdgeDefinition | undefined {
-  console.log(nodes.map((node) => node.data.id));
-  console.log(convertToSearchableString(imp.libraryName));
   const target = nodes.find((node) =>
     node.data.id?.includes(convertToSearchableString(imp.libraryName))
   )?.data.id;
-  console.log(target);
   if (!target) return undefined;
   return {
     data: {
