@@ -42,8 +42,9 @@ export async function convertToDirModel(
   };
   const parser = _parser ?? new TypescriptParser();
   const tsFiles = await analyzeTsFiles(dirHandle, dir, parser);
-  dir.tsFiles = tsFiles;
-  // dir.directories = dirHandle.
+  dir.tsFiles = tsFiles.filter(
+    (fileModel): fileModel is TsFileModel => !!fileModel
+  );
 
   const promises: Promise<DirModel>[] = [];
   for await (const entry of dirHandle.values()) {
@@ -79,47 +80,58 @@ async function analyzeTsFiles(
         .then(async (file) => ({ name: file.name, text: await file.text() }))
         .then(async ({ name, text }) => ({
           name,
-          file: await parser.parseSource(text),
+          file: await parser
+            .parseSource(text)
+            .catch(
+              (e) => (
+                console.warn(
+                  `${name} は TypeScript として認識できませんでした。`,
+                  e
+                ),
+                undefined
+              )
+            ),
           text,
         }))
-        .then(
-          ({ name, file, text }) =>
-            ({
-              name,
-              imports: file.imports
-                // .map((imp) => (console.log(imp), imp))
-                .map((imp) => ({
-                  src: text.substring(imp.start ?? 0, imp.end),
-                  libraryName: imp.libraryName,
-                })),
-              exports: file.declarations
-                .map((dec, _, declarations) => {
-                  if ((dec as any).isExported) return dec;
-                  const def = declarations.find(
-                    (dec) => dec instanceof DefaultDeclaration
-                  );
-                  if (def?.name !== dec.name) return dec;
-                  (dec as any).isExported = true;
-                  (dec as any).isDefault = true;
-                  return dec;
-                })
-                .filter((dec) => (dec as any).isExported)
-                .filter((dec) => !(dec instanceof DefaultDeclaration))
-                .map((dec) => ({
-                  name: dec.name,
-                  type:
-                    dec instanceof VariableDeclaration
-                      ? dec.isConst
-                        ? "const"
-                        : "let"
-                      : dec instanceof FunctionDeclaration
-                      ? "function"
-                      : "type",
-                  src: text.substring(dec.start ?? 0, dec.end),
-                  isDefault: !!(dec as any).isDefault,
-                })),
-              parent,
-            } as TsFileModel)
+        .then(({ name, file, text }) =>
+          file === undefined
+            ? undefined
+            : ({
+                name,
+                imports: file.imports
+                  // .map((imp) => (console.log(imp), imp))
+                  .map((imp) => ({
+                    src: text.substring(imp.start ?? 0, imp.end),
+                    libraryName: imp.libraryName,
+                  })),
+                exports: file.declarations
+                  .map((dec, _, declarations) => {
+                    if ((dec as any).isExported) return dec;
+                    const def = declarations.find(
+                      (dec) => dec instanceof DefaultDeclaration
+                    );
+                    if (def?.name !== dec.name) return dec;
+                    (dec as any).isExported = true;
+                    (dec as any).isDefault = true;
+                    return dec;
+                  })
+                  .filter((dec) => (dec as any).isExported)
+                  .filter((dec) => !(dec instanceof DefaultDeclaration))
+                  .map((dec) => ({
+                    name: dec.name,
+                    type:
+                      dec instanceof VariableDeclaration
+                        ? dec.isConst
+                          ? "const"
+                          : "let"
+                        : dec instanceof FunctionDeclaration
+                        ? "function"
+                        : "type",
+                    src: text.substring(dec.start ?? 0, dec.end),
+                    isDefault: !!(dec as any).isDefault,
+                  })),
+                parent,
+              } as TsFileModel)
         )
     );
   }
