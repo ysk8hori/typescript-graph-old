@@ -1,86 +1,4 @@
-import { NodeDefinition, EdgeDefinition, ElementDefinition } from "cytoscape";
-import cytoscape from "cytoscape";
-import { useEffect, useRef } from "react";
-import styled from "styled-components";
-import klay from "cytoscape-klay";
-import fcose from "cytoscape-fcose";
-
-cytoscape.use(klay);
-cytoscape.use(fcose);
-
-export default function CytoscapeGraph({
-  elements,
-}: {
-  elements: ElementDefinition[];
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!ref) return;
-    const cy = cytoscape({
-      container: ref.current,
-      style: [
-        {
-          selector: "node",
-          style: {
-            "background-color": "#2B65EC",
-            label: "data(alias)",
-          },
-        },
-
-        {
-          selector: ":parent",
-          style: {
-            "background-opacity": 0.233,
-            "border-color": "#2B65EC",
-          },
-        },
-
-        {
-          selector: "edge",
-          style: {
-            "line-color": "#2B65EC",
-            "target-arrow-shape": "triangle",
-            "target-arrow-color": "#2B65EC",
-            "mid-target-arrow-shape": "triangle",
-            "arrow-scale": 2,
-            "mid-target-arrow-color": "#2B65EC",
-          },
-        },
-
-        {
-          selector: "node:selected",
-          style: {
-            "background-color": "#F08080",
-            "border-color": "red",
-          },
-        },
-
-        {
-          selector: "edge:selected",
-          style: {
-            "line-color": "#F08080",
-          },
-        },
-      ],
-      elements,
-    });
-    cy.layout(klayOption as any).run();
-  }, [elements, ref]);
-  return (
-    <div>
-      <h1>cytoscape</h1>
-      <Container ref={ref}></Container>
-    </div>
-  );
-}
-
-const Container = styled.div`
-  width: 100vw;
-  height: 100vh;
-  background-color: #e0e0e0;
-`;
-
-const fcoseOption = {
+export const fcoseOption: any = {
   // 'draft', 'default' or 'proof'
   // - "draft" only applies spectral layout
   // - "default" improves the quality with incremental layout (fast cooling rate)
@@ -166,7 +84,7 @@ const fcoseOption = {
   name: "fcose",
 };
 
-const klayOption = {
+export const klayOption: any = {
   nodeDimensionsIncludeLabels: false, // Boolean which changes whether label dimensions are included when calculating node dimensions
   fit: true, // Whether to fit
   padding: 20, // Padding on fit
