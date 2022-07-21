@@ -51,9 +51,6 @@ export async function convertToDirModel(
     (fileModel): fileModel is TsFileModel => !!fileModel
   );
 
-  // TS のファイルが存在しないディレクトリは表示しない
-  if (dir.tsFiles.length === 0) return undefined;
-
   const promises: Promise<DirModel | undefined>[] = [];
   for await (const entry of dirHandle.values()) {
     if (entry.kind === "file") continue;
@@ -68,6 +65,10 @@ export async function convertToDirModel(
   dir.directories = (await Promise.all(promises)).filter(
     (dir): dir is DirModel => !!dir
   );
+
+  // TS のファイルが存在しないディレクトリは表示しない
+  if (dir.tsFiles.length === 0 && dir.directories.length === 0)
+    return undefined;
   return dir;
 }
 
