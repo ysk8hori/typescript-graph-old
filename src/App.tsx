@@ -3,13 +3,18 @@ import styled from "styled-components";
 import { ElementDefinition } from "cytoscape";
 import { createGraph } from "./models/createGraph";
 import CytoscapeGraph from "./components/features/cytoscape/CytoscapeGraph";
+import { convertToDirModel, DirModel } from "./models/DirModel";
 
 function App() {
   const [elements, setElements] = useState<ElementDefinition[]>([]);
+  const [dirModel, setDirModel] = useState<DirModel | undefined>();
   const readDir = useCallback(async () => {
     const dirHandle = await showDirectoryPicker({ mode: "read" });
     if (!dirHandle) return;
-    createGraph(dirHandle).then(setElements);
+    const dirModel = await convertToDirModel(dirHandle);
+    setDirModel(dirModel);
+    if (!dirModel) return;
+    createGraph(dirModel).then(setElements);
   }, [setElements]);
 
   return (

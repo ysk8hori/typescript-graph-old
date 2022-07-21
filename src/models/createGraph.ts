@@ -6,22 +6,21 @@ import {
   TsFileModel,
 } from "./DirModel";
 
+/**
+ *
+ * @param dirModel
+ * @param elements ElementDefinitionを受け取るのは、他のディレクトリから読み取った情報をマージしたい場合に備えている
+ * @returns
+ */
 export async function createGraph(
-  handle: FileSystemDirectoryHandle,
+  dirModel: DirModel,
   elements: ElementDefinition[] = []
 ): Promise<ElementDefinition[]> {
-  elements.push(...(await createDirNode(handle)));
+  if (!dirModel) return [];
+  const nodes = createNodes(dirModel);
+  const edges = createEdges(nodes, dirModel);
+  elements.push(...nodes, ...edges);
   return elements;
-}
-
-async function createDirNode(
-  handle: FileSystemDirectoryHandle
-): Promise<ElementDefinition[]> {
-  const dir = await convertToDirModel(handle);
-  if (!dir) return [];
-  const nodes = createNodes(dir);
-  const edges = createEdges(nodes, dir);
-  return [...nodes, ...edges];
 }
 
 function createNodes(dirModel: DirModel): NodeDefinition[] {
