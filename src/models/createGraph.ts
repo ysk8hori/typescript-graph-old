@@ -1,10 +1,5 @@
 import { NodeDefinition, EdgeDefinition, ElementDefinition } from "cytoscape";
-import {
-  convertToDirModel,
-  DirModel,
-  ImportModel,
-  TsFileModel,
-} from "./DirModel";
+import { DirModel, ImportModel, TsFileModel } from "./DirModel";
 
 /**
  *
@@ -73,11 +68,16 @@ function createEdges(
       .filter(exists) ?? []),
   ];
 }
-function createEdge(
+export function createEdge(
   nodes: NodeDefinition[],
-  tsfile: TsFileModel,
+  tsfile: Pick<TsFileModel, "name" | "parent">,
   imp: ImportModel
 ): EdgeDefinition | undefined {
+  // if (tsfile.name === "createGraph.ts") {
+  console.log(nodes);
+  console.log(tsfile);
+  console.log(imp);
+  // }
   const target = nodes.find((node) =>
     node.data.id?.includes(convertToSearchableString(imp.libraryName))
   )?.data.id;
@@ -99,6 +99,6 @@ function exists<T>(t: T | undefined | null): t is T {
   return t !== undefined && t !== null;
 }
 
-function generateId(tsfile: TsFileModel): string {
+function generateId(tsfile: Pick<TsFileModel, "name" | "parent">): string {
   return `${tsfile.parent.path}/${tsfile.name}`;
 }
