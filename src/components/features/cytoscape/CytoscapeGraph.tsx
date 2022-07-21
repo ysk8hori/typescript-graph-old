@@ -23,7 +23,7 @@ export default function CytoscapeGraph({
       style: cytoscapeStyles,
       elements,
     });
-    cy.layout(fcoseOption).run();
+    cy.layout(klayOption).run();
   }, [elements, ref]);
   return <Container ref={ref}></Container>;
 }

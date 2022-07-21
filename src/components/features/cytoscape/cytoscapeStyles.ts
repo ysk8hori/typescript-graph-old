@@ -8,7 +8,7 @@ const cytoscapeStyles: cytoscape.Stylesheet[] = [
   },
 
   {
-    selector: ":parent",
+    selector: "node:parent",
     style: {
       "background-opacity": 0.233,
       "border-color": "#2B65EC",
@@ -18,12 +18,16 @@ const cytoscapeStyles: cytoscape.Stylesheet[] = [
   {
     selector: "edge",
     style: {
+      "curve-style": "unbundled-bezier",
+      "control-point-distances": [60],
+      "control-point-weights": [0.5],
       "line-color": "#2B65EC",
       "target-arrow-shape": "triangle",
       "target-arrow-color": "#2B65EC",
-      "mid-target-arrow-shape": "triangle",
-      "arrow-scale": 2,
+      "arrow-scale": 1,
       "mid-target-arrow-color": "#2B65EC",
+      // opacity: 0.8,
+      width: 1.5,
     },
   },
 
@@ -39,6 +43,7 @@ const cytoscapeStyles: cytoscape.Stylesheet[] = [
     selector: "edge:selected",
     style: {
       "line-color": "#F08080",
+      "target-arrow-color": "#F08080",
     },
   },
 ];
