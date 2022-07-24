@@ -78,7 +78,7 @@ export function createEdge(
   return {
     data: {
       source: generateId(tsfile),
-      target,
+      target: target.data.id!,
     },
   };
 }
@@ -88,12 +88,40 @@ function findTarget(
   nodes: NodeDefinition[],
   tsfile: Pick<TsFileModel, "name" | "parent">,
   imp: ImportModel
-): string | undefined {
-  const absolutePath = getAbsolutePath(tsfile, imp);
+): NodeDefinition | undefined {
+  let absolutePath = getAbsolutePath(tsfile, imp);
+  const extentions = [".ts", ".tsx", ".js", ".jsx"] as const;
+  const ext = extentions.find((extention) => absolutePath.endsWith(extention));
+  if (ext) {
+    absolutePath = absolutePath.substring(0, absolutePath.length - ext.length);
+  }
 
-  return [".ts", ".tsx", ".js", ".jsx", "vue", ""]
-    .map((extention) => absolutePath + extention)
-    .find((absPath) => nodes.some((node) => node.data.id === absPath));
+  const targetNode = nodes.find((node) => {
+    const id = node.data.id;
+    if (!id) return false;
+    const ext = extentions.find((extention) => id.endsWith(extention));
+    return (
+      (ext ? id.substring(0, id.length - ext.length) : id) === absolutePath
+    );
+  });
+
+  if (targetNode) return targetNode;
+
+  // 解決が困難なパスはあてずっぽう
+
+  // '/' を含まない場合はライブラリである（現状、ライブラリの場合は undefined を返す）
+  if (!absolutePath.includes("/")) return undefined;
+
+  // absolutePath の根元のディレクトリ名から順に消していって endWith で一致したらそれを信用する。（あてずっぽうなので今はこれで良い）
+  const noAlias = absolutePath.substring(absolutePath.indexOf("/"));
+  return nodes.find((node) => {
+    const id = node.data.id;
+    if (!id) return false;
+    const ext = extentions.find((extention) => id.endsWith(extention));
+    return (ext ? id.substring(0, id.length - ext.length) : id).endsWith(
+      noAlias
+    );
+  });
 }
 
 /**
@@ -111,7 +139,7 @@ function getAbsolutePath(
   splitedImportedLib.forEach((dirname, i) => {
     if (i === 0 && dirname !== "." && dirname !== "..") {
       // 最初の要素が './' または '../' じゃない場合は相対パスじゃないと判断し tmpPath をクリアする
-      tmpPath = [];
+      tmpPath = [dirname];
       return;
     }
     if (dirname === ".") {

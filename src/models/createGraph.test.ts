@@ -226,4 +226,129 @@ describe("createEdge", () => {
       data: { source: "a/a/a/a.ts", target: "a/b/b.ts" },
     });
   });
+  test("エイリアスのパスをあてずっぽうで解決する", () => {
+    // 'cytoscape' をインポートする際、本来は参照先が存在しないはずだが、 'cytoscape' の名前を含むディレクトリを参照先にしてしまうなどのバグがあった。
+    const edge = createEdge(
+      [
+        {
+          group: "nodes",
+          data: {
+            id: "a/b.ts",
+            alias: "b.ts",
+          },
+        },
+        {
+          group: "nodes",
+          data: {
+            id: "a/a.ts",
+            alias: "a.ts",
+          },
+        },
+        {
+          group: "nodes",
+          data: {
+            id: "a/a",
+            alias: "a/a",
+          },
+        },
+        {
+          group: "nodes",
+          data: {
+            id: "a/a/b.ts",
+            alias: "b.ts",
+            parent: "a/a",
+          },
+        },
+        {
+          group: "nodes",
+          data: {
+            id: "a/a/a.ts",
+            alias: "a.ts",
+            parent: "a/a",
+          },
+        },
+        {
+          group: "nodes",
+          data: {
+            id: "a/a/a",
+            alias: "a/a/a",
+            parent: "a/a",
+          },
+        },
+        {
+          group: "nodes",
+          data: {
+            id: "a/a/a/b.ts",
+            alias: "b.ts",
+            parent: "a/a/a",
+          },
+        },
+        {
+          group: "nodes",
+          data: {
+            id: "a/a/a/a.ts",
+            alias: "a.ts",
+            parent: "a/a/a",
+          },
+        },
+        {
+          group: "nodes",
+          data: {
+            id: "a/a/b",
+            alias: "a/a/b",
+            parent: "a/a",
+          },
+        },
+        {
+          // ここがヒットする
+          group: "nodes",
+          data: {
+            id: "a/a/b/b.ts",
+            alias: "b.ts",
+            parent: "a/a/b",
+          },
+        },
+        {
+          // ここから '＠/b/b' を import する
+          group: "nodes",
+          data: {
+            id: "a/a/b/a.ts",
+            alias: "a.ts",
+            parent: "a/a/b",
+          },
+        },
+        {
+          group: "nodes",
+          data: {
+            id: "a/b",
+            alias: "a/b",
+          },
+        },
+        {
+          group: "nodes",
+          data: {
+            id: "a/b/b.ts",
+            alias: "b.ts",
+            parent: "a/b",
+          },
+        },
+        {
+          group: "nodes",
+          data: {
+            id: "a/b/a.ts",
+            alias: "a.ts",
+            parent: "a/b",
+          },
+        },
+      ],
+      { name: "a.ts", parent: { path: "a/a/a" } },
+      {
+        src: 'import b from "＠/b/b";',
+        libraryName: "＠/b/b",
+      }
+    );
+    expect(edge).toEqual({
+      data: { source: "a/a/a/a.ts", target: "a/a/b/b.ts" },
+    });
+  });
 });
