@@ -73,14 +73,7 @@ export function createEdge(
   tsfile: Pick<TsFileModel, "name" | "parent">,
   imp: ImportModel
 ): EdgeDefinition | undefined {
-  // if (tsfile.name === "createGraph.ts") {
-  console.log(nodes);
-  console.log(tsfile);
-  console.log(imp);
-  // }
-  const target = nodes.find((node) =>
-    node.data.id?.includes(convertToSearchableString(imp.libraryName))
-  )?.data.id;
+  const target = findTarget(nodes, tsfile, imp);
   if (!target) return undefined;
   return {
     data: {
@@ -90,9 +83,51 @@ export function createEdge(
   };
 }
 
-function convertToSearchableString(libraryName: string) {
-  // TODO: ここ超適当
-  return libraryName.replaceAll(/\.\.\/|@\/|\.\//g, "");
+// TODO エイリアスの解決
+function findTarget(
+  nodes: NodeDefinition[],
+  tsfile: Pick<TsFileModel, "name" | "parent">,
+  imp: ImportModel
+): string | undefined {
+  const absolutePath = getAbsolutePath(tsfile, imp);
+
+  return [".ts", ".tsx", ".js", ".jsx", "vue", ""]
+    .map((extention) => absolutePath + extention)
+    .find((absPath) => nodes.some((node) => node.data.id === absPath));
+}
+
+/**
+ * インポートモジュールの、解決可能な限りの絶対パスを導き出す
+ */
+function getAbsolutePath(
+  tsfile: Pick<TsFileModel, "name" | "parent">,
+  imp: ImportModel
+) {
+  // tsfile.parent は親ディレクトリのパス @example 'a/b/c'
+  let tmpPath = tsfile.parent.path.split("/");
+  //  imp.libraryName は import 文の from 後の部分 @example 'a/a/b(.ts)'
+  const splitedImportedLib = imp.libraryName.split("/");
+
+  splitedImportedLib.forEach((dirname, i) => {
+    if (i === 0 && dirname !== "." && dirname !== "..") {
+      // 最初の要素が './' または '../' じゃない場合は相対パスじゃないと判断し tmpPath をクリアする
+      tmpPath = [];
+      return;
+    }
+    if (dirname === ".") {
+      // './' の場合、指すディレクトリは変わらない
+      return;
+    }
+    if (dirname === "..") {
+      // '../' は一つ親のディレクトリを指す
+      tmpPath.pop();
+      return;
+    }
+    // どれでもない場合はその dirname のディレクトリに移動
+    tmpPath.push(dirname);
+  });
+
+  return tmpPath.join("/");
 }
 
 function exists<T>(t: T | undefined | null): t is T {
