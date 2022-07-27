@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { ElementDefinition } from "cytoscape";
 import { createGraph } from "./models/createGraph";
 import CytoscapeGraph from "./components/features/cytoscape/CytoscapeGraph";
 import { convertToDirModel, DirModel } from "./models/DirModel";
+import { ReactFlowGraph } from "./components/features/reactflow/ReactFlowGraph";
+import { convert } from "./components/features/reactflow/converter";
 
 function App() {
   const [elements, setElements] = useState<ElementDefinition[]>([]);
@@ -16,10 +18,15 @@ function App() {
     if (!dirModel) return;
     createGraph(dirModel).then(setElements);
   }, [setElements]);
+  const { nodes, edges } = useMemo(() => {
+    return convert(elements);
+  }, [elements]);
 
   return (
     <Container>
-      <CytoscapeGraph elements={elements} />
+      {/* <CytoscapeGraph elements={elements} /> */}
+
+      <ReactFlowGraph nodes={nodes} edges={edges} />
       <div style={{ zIndex: 1 }}>
         <button onClick={readDir}>chose directory</button>
       </div>

@@ -34,6 +34,7 @@ function createDirectoryNode(dirModel: DirModel): NodeDefinition[] {
         id: dirModel.path,
         alias: dirModel.path,
         parent: dirModel.parent?.path,
+        nodeType: "directory",
       },
     },
   ];
@@ -45,6 +46,7 @@ function createTsFileNode(tsfile: TsFileModel): NodeDefinition {
       id: generateId(tsfile),
       alias: tsfile.name,
       parent: tsfile.parent.path,
+      nodeType: "source code",
     },
   };
 }
@@ -73,12 +75,15 @@ export function createEdge(
   tsfile: Pick<TsFileModel, "name" | "parent">,
   imp: ImportModel
 ): EdgeDefinition | undefined {
-  const target = findTarget(nodes, tsfile, imp);
-  if (!target) return undefined;
+  const targetNode = findTarget(nodes, tsfile, imp);
+  if (!targetNode) return undefined;
+  const source = generateId(tsfile);
+  const target = targetNode.data.id!;
   return {
     data: {
-      source: generateId(tsfile),
-      target: target.data.id!,
+      id: `${source}-${target}`,
+      source,
+      target,
     },
   };
 }
