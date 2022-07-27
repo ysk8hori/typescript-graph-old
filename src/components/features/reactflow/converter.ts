@@ -11,7 +11,7 @@ export function convert(elements: ElementDefinition[]): {
     ele.group === "nodes"
       ? nodes.push({
           id: ele.data.id!,
-          type: ele.data.nodeType === "directory" ? "group" : "default",
+          type: isParent(ele) ? "group" : "default",
           data: {
             label: ele.data.alias,
           },
@@ -21,6 +21,13 @@ export function convert(elements: ElementDefinition[]): {
             : undefined,
           targetPosition: Position.Left,
           sourcePosition: Position.Right,
+          width: isParent(ele) ? 300 : 150,
+          height: isParent(ele) ? 200 : 50,
+          style: {
+            backgroundColor: isParent(ele) ? "pink" : "rgba(255,255,255,0)",
+            width: isParent(ele) ? 300 : 150,
+            height: isParent(ele) ? 200 : 50,
+          },
         })
       : edges.push({
           id: ele.data.id!,
@@ -29,4 +36,8 @@ export function convert(elements: ElementDefinition[]): {
         })
   );
   return { nodes, edges };
+}
+
+function isParent(ele: ElementDefinition) {
+  return ele.data.nodeType === "directory";
 }

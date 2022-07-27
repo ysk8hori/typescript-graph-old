@@ -10,7 +10,11 @@ export default async function layout(
   const graph = {
     id: "root",
     layoutOptions: { "elk.algorithm": "layered" },
-    children: nodes.map((node) => ({ ...node, width: 150, height: 50 })),
+    children: nodes.map((node) => ({
+      ...node,
+      width: node.width!,
+      height: node.height!,
+    })),
     edges: edges.map((edge) => ({
       ...edge,
       sources: [edge.source],
