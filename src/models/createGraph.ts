@@ -75,10 +75,13 @@ export function createEdge(
 ): EdgeDefinition | undefined {
   const target = findTarget(nodes, tsfile, imp);
   if (!target) return undefined;
+  const sourceId = generateId(tsfile);
+  const targetId = target.data.id!;
   return {
     data: {
-      source: generateId(tsfile),
-      target: target.data.id!,
+      id: `${sourceId}-${targetId}`,
+      source: sourceId,
+      target: targetId,
     },
   };
 }
