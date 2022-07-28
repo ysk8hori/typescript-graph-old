@@ -6,9 +6,11 @@ import klay from "cytoscape-klay";
 import fcose from "cytoscape-fcose";
 import cytoscapeStyles from "./cytoscapeStyles";
 import { klayOption, fcoseOption } from "./cytoscapeLayoutOptions";
+import cxtmenu from "cytoscape-cxtmenu";
 
 cytoscape.use(klay);
 cytoscape.use(fcose);
+cytoscape.use(cxtmenu);
 
 export default function CytoscapeGraph({
   elements,
