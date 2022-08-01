@@ -12,7 +12,11 @@ export async function createGraph(
   elements: ElementDefinition[] = []
 ): Promise<ElementDefinition[]> {
   if (!dirModels) return [];
-  const nodes = dirModels.map(createNodes).flat();
+  const nodes = dirModels
+    .map((dirModel) =>
+      createNodes(dirModel, { multipleDir: 2 <= dirModels.length })
+    )
+    .flat();
   const edges = dirModels
     .map((dirModel) => createEdges(nodes, dirModel))
     .flat();
@@ -20,15 +24,25 @@ export async function createGraph(
   return elements;
 }
 
-function createNodes(dirModel: DirModel): NodeDefinition[] {
+function createNodes(
+  dirModel: DirModel,
+  options: { multipleDir: boolean }
+): NodeDefinition[] {
   return [
-    ...createDirectoryNode(dirModel),
+    ...createDirectoryNode(dirModel, options),
     ...(dirModel.tsFiles ?? []).map(createTsFileNode),
-    ...(dirModel.directories ?? []).map(createNodes).flat(),
+    ...(dirModel.directories ?? [])
+      .map((dirModel, _i, dirModels) =>
+        createNodes(dirModel, { multipleDir: 2 <= dirModels.length })
+      )
+      .flat(),
   ];
 }
-function createDirectoryNode(dirModel: DirModel): NodeDefinition[] {
-  if (!dirModel.parent) return [];
+function createDirectoryNode(
+  dirModel: DirModel,
+  { multipleDir }: { multipleDir: boolean }
+): NodeDefinition[] {
+  if (!multipleDir && !dirModel.parent) return [];
   return [
     {
       group: "nodes",
