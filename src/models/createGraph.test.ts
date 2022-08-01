@@ -25,7 +25,10 @@ describe("createEdge", () => {
       { libraryName: "./a/a-1", src: 'import { a1 } from "./a/a-1";' }
     );
     expect(edge).toEqual({
-      data: { source: "tes/index.ts", target: "tes/a/a-1.ts" },
+      data: expect.objectContaining({
+        source: "tes/index.ts",
+        target: "tes/a/a-1.ts",
+      }),
     });
   });
   test("親ディレクトリのファイルを参照するエッジを生成できる", () => {
@@ -61,7 +64,10 @@ describe("createEdge", () => {
       }
     );
     expect(edge).toEqual({
-      data: { source: "tes/a/a-2.ts", target: "tes/dummyUtil.ts" },
+      data: expect.objectContaining({
+        source: "tes/a/a-2.ts",
+        target: "tes/dummyUtil.ts",
+      }),
     });
   });
   test.skip("ライブラリの名前を含むディレクトリを参照先にしない", () => {
@@ -98,7 +104,10 @@ describe("createEdge", () => {
       }
     );
     expect(edge).toEqual({
-      data: { source: "tes/a/a-2.ts", target: "cytoscape" },
+      data: expect.objectContaining({
+        source: "tes/a/a-2.ts",
+        target: "cytoscape",
+      }),
     });
   });
   test("相対パスを正しく解決する", () => {
@@ -223,7 +232,10 @@ describe("createEdge", () => {
       }
     );
     expect(edge).toEqual({
-      data: { source: "a/a/a/a.ts", target: "a/b/b.ts" },
+      data: expect.objectContaining({
+        source: "a/a/a/a.ts",
+        target: "a/b/b.ts",
+      }),
     });
   });
   test("エイリアスのパスをあてずっぽうで解決する", () => {
@@ -348,7 +360,10 @@ describe("createEdge", () => {
       }
     );
     expect(edge).toEqual({
-      data: { source: "a/a/a/a.ts", target: "a/a/b/b.ts" },
+      data: expect.objectContaining({
+        source: "a/a/a/a.ts",
+        target: "a/a/b/b.ts",
+      }),
     });
   });
 });
