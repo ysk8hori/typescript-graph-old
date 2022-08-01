@@ -8,12 +8,14 @@ import { DirModel, ImportModel, TsFileModel } from "./DirModel";
  * @returns
  */
 export async function createGraph(
-  dirModel: DirModel,
+  dirModels: DirModel[],
   elements: ElementDefinition[] = []
 ): Promise<ElementDefinition[]> {
-  if (!dirModel) return [];
-  const nodes = createNodes(dirModel);
-  const edges = createEdges(nodes, dirModel);
+  if (!dirModels) return [];
+  const nodes = dirModels.map(createNodes).flat();
+  const edges = dirModels
+    .map((dirModel) => createEdges(nodes, dirModel))
+    .flat();
   elements.push(...nodes, ...edges);
   return elements;
 }
