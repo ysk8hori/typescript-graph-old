@@ -3,6 +3,7 @@ import {
   ElementDefinition,
   Singular,
   EdgeSingular,
+  NodeSingular,
 } from "cytoscape";
 import cytoscape from "cytoscape";
 import { useEffect, useRef } from "react";
@@ -65,13 +66,6 @@ export default function CytoscapeGraph({
                   !edge.source().id().includes(id)
               );
 
-            mySourceEdges.map((edge: EdgeSingular) =>
-              edge.style("display", "none")
-            );
-            myTargetEdges.map((edge: EdgeSingular) =>
-              edge.style("display", "none")
-            );
-
             // 選択したディレクトリ（ノードも選択されるのだが）内のノードに関連するエッジを選択したディレクトリ向けにする。そのうえで重複排除する。
             const sourceEdge = mySourceEdges.map((edge: EdgeSingular) => {
               const newEdge: EdgeDefinition = {
@@ -95,8 +89,18 @@ export default function CytoscapeGraph({
             });
 
             cy.add([...sourceEdge, ...targetEdge]);
+
             cy.remove(mySourceEdges);
             cy.remove(myTargetEdges);
+            cy.remove(
+              cy
+                .nodes()
+                .filter(
+                  (node) =>
+                    id.length < node.id().length && node.id().includes(id)
+                )
+            );
+            cy.layout({ ...klayOption, animate: true }).run();
           },
           enabled: true, // whether the command is selectable
         },
