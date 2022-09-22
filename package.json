@@ -27,7 +27,7 @@
     "@types/cytoscape": "3.19.7",
     "@types/cytoscape-cxtmenu": "^3.4.0",
     "@types/node": "18.0.0",
-    "@types/react": "18.0.15",
+    "@types/react": "18.0.21",
     "@types/react-dom": "18.0.6",
     "@types/react-syntax-highlighter": "15.5.4",
     "@types/wicg-file-system-access": "2020.9.5",
