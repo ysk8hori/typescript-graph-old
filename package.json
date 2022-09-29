@@ -10,32 +10,32 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@types/styled-components": "5.1.25",
+    "@types/styled-components": "5.1.26",
     "browser-typescript-parser": "2.6.7",
-    "cytoscape": "3.22.1",
+    "cytoscape": "3.23.0",
     "cytoscape-cxtmenu": "^3.4.0",
     "cytoscape-fcose": "2.1.0",
     "cytoscape-klay": "3.1.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-flow-renderer": "10.3.12",
+    "react-flow-renderer": "10.3.17",
     "react-icons": "4.4.0",
     "react-syntax-highlighter": "15.5.0",
-    "styled-components": "5.3.5"
+    "styled-components": "5.3.6"
   },
   "devDependencies": {
-    "@types/cytoscape": "3.19.7",
+    "@types/cytoscape": "3.19.9",
     "@types/cytoscape-cxtmenu": "^3.4.0",
     "@types/node": "18.0.0",
     "@types/react": "18.0.15",
     "@types/react-dom": "18.0.6",
-    "@types/react-syntax-highlighter": "15.5.4",
+    "@types/react-syntax-highlighter": "15.5.5",
     "@types/wicg-file-system-access": "2020.9.5",
-    "@vitejs/plugin-react": "2.0.0",
-    "eslint": "8.20.0",
+    "@vitejs/plugin-react": "2.1.0",
+    "eslint": "8.24.0",
     "tslib": "^2.4.0",
     "typescript": "4.7.4",
-    "vite": "3.0.4",
-    "vitest": "0.20.2"
+    "vite": "3.1.4",
+    "vitest": "0.23.4"
   }
 }
