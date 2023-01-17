@@ -4,6 +4,7 @@
 
 自分がコードレビューをする際に活用することが目的で作っています。
 
+すみません、今は以下のURLは使えないです。
 https://ysk8hori.github.io/typescript-graph/
 
 ![image](https://user-images.githubusercontent.com/5052869/201675645-55f35027-fa6f-4c38-9c3e-221d1f057f86.png)
